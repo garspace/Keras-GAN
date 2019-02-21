@@ -67,10 +67,12 @@ class AdversarialAutoencoder():
         h = LeakyReLU(alpha=0.2)(h)
         mu = Dense(self.latent_dim)(h)
         log_var = Dense(self.latent_dim)(h)
-        latent_repr = merge([mu, log_var],
-                mode=lambda p: p[0] + K.random_normal(K.shape(p[0])) * K.exp(p[1] / 2),
-                output_shape=lambda p: p[0])
-
+        # keras version < 2.0 please uncomment the code
+        #         latent_repr = merge([mu, log_var],
+        #                 mode=lambda p: p[0] + K.random_normal(K.shape(p[0])) * K.exp(p[1] / 2),
+        #                 output_shape=lambda p: p[0])
+        # keras version > 2.0 please use the code 
+        latent_repr = Lambda(lambda p: p[0] + K.random_normal(K.shape(p[0])) * K.exp(p[1] / 2), output_shape=lambda p: p[0])([mu, log_var])
         return Model(img, latent_repr)
 
     def build_decoder(self):
